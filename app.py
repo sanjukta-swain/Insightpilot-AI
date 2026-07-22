@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from modules.data_cleaning import clean_data
 from modules.ai_insights import configure_gemini, generate_insights
 from modules.pdf_report import create_pdf_report
+from modules.forecasting import forecast_sales
 
 load_dotenv()
 
@@ -300,6 +301,42 @@ if uploaded_file is not None:
         orientation="h",
         color="Sales",
         title="Top 10 Customers by Sales"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("📈 Sales Forecast (Next 6 Months)")
+
+    # Forecast Sales
+    monthly_sales, future_sales = forecast_sales(cleaned_df)
+
+    import plotly.graph_objects as go
+
+    fig = go.Figure()
+
+    # Historical Sales
+    fig.add_trace(go.Scatter(
+        x=monthly_sales["Order Date"],
+        y=monthly_sales["Sales"],
+        mode="lines+markers",
+        name="Historical Sales"
+    ))
+
+    # Forecast Sales
+    future_labels = [f"Future {i+1}" for i in range(len(future_sales))]
+
+    fig.add_trace(go.Scatter(
+        x=future_labels,
+        y=future_sales["Predicted Sales"],
+        mode="lines+markers",
+        name="Forecast Sales"
+    ))
+
+    fig.update_layout(
+        title="Sales Forecast for Next 6 Months",
+        xaxis_title="Month",
+        yaxis_title="Sales"
     )
 
     st.plotly_chart(fig, use_container_width=True)
