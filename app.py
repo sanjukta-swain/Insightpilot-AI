@@ -1,7 +1,22 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
+
+from dotenv import load_dotenv
 from modules.data_cleaning import clean_data
+from modules.ai_insights import configure_gemini, generate_insights
+from modules.pdf_report import create_pdf_report
+
+load_dotenv()
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not API_KEY:
+    st.error("Gemini API Key not found.")
+    st.stop()
+
+client = configure_gemini(API_KEY)
 
 # ----------------------------
 # Page Configuration
@@ -95,7 +110,6 @@ if uploaded_file is not None:
 
     st.dataframe(cleaned_df)
     st.markdown("---")
-    cleaned_df, summary = clean_data(df)
 
     st.success("Dataset cleaned successfully!")
     st.write("### Cleaning Summary")
@@ -289,3 +303,24 @@ if uploaded_file is not None:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
+    st.subheader("🤖 AI Business Analyst")
+
+    if st.button("Generate AI Insights"):
+
+        data_summary = filtered_df.describe(include="all").to_string()
+
+        with st.spinner("Analyzing dataset with Gemini AI..."):
+            insights = generate_insights(client, data_summary)
+
+        st.write(insights)
+
+        pdf_file = create_pdf_report(insights)
+
+        with open(pdf_file, "rb") as file:
+           st.download_button(
+               label="📄 Download AI Report (PDF)",
+               data=file,
+               file_name="InsightPilot_AI_Report.pdf",
+               mime="application/pdf"
+            )
