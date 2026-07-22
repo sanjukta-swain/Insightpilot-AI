@@ -95,6 +95,46 @@ if uploaded_file is not None:
 
     st.dataframe(cleaned_df)
     st.markdown("---")
+    cleaned_df, summary = clean_data(df)
+
+    st.success("Dataset cleaned successfully!")
+    st.write("### Cleaning Summary")
+
+    st.write(summary)
+
+    st.write("### Cleaned Dataset")
+
+    st.dataframe(cleaned_df)
+    st.markdown("---")
+
+   # ----------------------------
+   # Sidebar Filters
+   # ----------------------------
+    st.sidebar.header("🎛️ Dashboard Filters")
+
+    region = st.sidebar.multiselect(
+        "Select Region",
+        options=cleaned_df["Region"].unique(),
+        default=cleaned_df["Region"].unique()
+    )
+
+    category = st.sidebar.multiselect(
+        "Select Category",
+        options=cleaned_df["Category"].unique(),
+        default=cleaned_df["Category"].unique()
+    )
+
+    segment = st.sidebar.multiselect(
+        "Select Segment",
+        options=cleaned_df["Segment"].unique(),
+        default=cleaned_df["Segment"].unique()
+    )
+
+    filtered_df = cleaned_df[
+        (cleaned_df["Region"].isin(region)) &
+        (cleaned_df["Category"].isin(category)) &
+        (cleaned_df["Segment"].isin(segment))
+    ]
 
 
     st.subheader("📊 Business Dashboard")
@@ -103,18 +143,18 @@ if uploaded_file is not None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-     st.metric("💰 Total Sales", f"${cleaned_df['Sales'].sum():,.2f}")
+     st.metric("💰 Total Sales", f"${filtered_df['Sales'].sum():,.2f}")
 
     with col2:
-     st.metric("💵 Total Profit", f"${cleaned_df['Profit'].sum():,.2f}")
+     st.metric("💵 Total Profit", f"${filtered_df['Profit'].sum():,.2f}")
 
     with col3:
-     st.metric("📦 Total Orders", cleaned_df["Order ID"].nunique())
+     st.metric("📦 Total Orders", filtered_df["Order ID"].nunique())
      st.markdown("---")
 
     st.subheader("📊 Sales by Region")
 
-    region_sales = cleaned_df.groupby("Region")["Sales"].sum().reset_index()
+    region_sales = filtered_df.groupby("Region")["Sales"].sum().reset_index()
     st.write(cleaned_df.columns.tolist())
 
     fig = px.bar(
