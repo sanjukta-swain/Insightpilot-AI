@@ -32,6 +32,21 @@ st.set_page_config(
 # Title
 # ----------------------------
 st.title("📊 InsightPilot AI")
+with st.expander("ℹ️ About InsightPilot AI"):
+    st.write("""
+    InsightPilot AI is an AI-powered Business Analytics and Decision Intelligence Platform.
+
+    Features:
+    • Automatic Data Cleaning
+    • Interactive Business Dashboard
+    • AI-generated Business Insights
+    • Sales Forecasting
+    • PDF Report Generation
+    • Download Cleaned Dataset
+
+    Developed using:
+    Python • Streamlit • Plotly • Pandas • Scikit-learn • Gemini AI
+    """)
 st.subheader("AI-Powered Business Analytics & Decision Intelligence Platform")
 
 st.markdown("---")
@@ -110,6 +125,7 @@ if uploaded_file is not None:
     st.write("### Cleaned Dataset")
 
     st.dataframe(cleaned_df)
+    
     st.markdown("---")
 
     st.success("Dataset cleaned successfully!")
@@ -120,12 +136,24 @@ if uploaded_file is not None:
     st.write("### Cleaned Dataset")
 
     st.dataframe(cleaned_df)
+    csv = cleaned_df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="⬇️ Download Cleaned Dataset",
+        data=csv,
+        file_name="cleaned_dataset.csv",
+        mime="text/csv"
+        )
     st.markdown("---")
 
    # ----------------------------
    # Sidebar Filters
    # ----------------------------
     st.sidebar.header("🎛️ Dashboard Filters")
+
+
+    if st.sidebar.button("🔄 Reset Filters"):
+      st.rerun()
 
     region = st.sidebar.multiselect(
         "Select Region",
